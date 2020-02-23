@@ -53,9 +53,9 @@ public class GripPipeline {
 
 			// Step HSV_Threshold0:
 			Mat hsvThresholdInput = blurOutput;
-			double[] hsvThresholdHue = {0.0, 95.21808595622304};
+			double[] hsvThresholdHue = {0.0, 90.0};
 			double[] hsvThresholdSaturation = {0.0, 255.0};
-			double[] hsvThresholdValue = {248.2768361581921, 255.0};
+			double[] hsvThresholdValue = {254.5, 255.0};
 			hsvThreshold(hsvThresholdInput, hsvThresholdHue, hsvThresholdSaturation, hsvThresholdValue, hsvThresholdOutput);
 
 			
@@ -99,8 +99,11 @@ public class GripPipeline {
 
 			//print goal distance from camera
 			
+			System.out.println(findXAngle(findGoal(filterContoursOutput())));
 			//System.out.println(focalLength(findGoal(filterContoursOutput())));
-			System.out.println(goalDistance(findGoal(filterContoursOutput())));
+			//System.out.println(goalDistance(findGoal(filterContoursOutput())));
+			//System.out.println(pixToInch(findGoalWidth(findGoal(filterContoursOutput())), goalDistance(findGoal(filterContoursOutput()))));
+		
 			
 		}
 
@@ -379,7 +382,7 @@ public class GripPipeline {
 			
 			return centers;
 		}
-		
+				
 		public void drawMyContours(List<MatOfPoint> contours, MatOfPoint goal, Mat img) {
 			Scalar c = new Scalar(255, 0, 0, 1);
 			Scalar r = new Scalar(0, 0, 255, 1);
@@ -407,14 +410,20 @@ public class GripPipeline {
 			}
 		}
 		
-		public void drawCenters(ArrayList<int[]> centers, Mat img) {
+		public void drawCenters(ArrayList<int[]> centers, Point center, Mat img) {
+			
+			
 			for (int i = 0; i < centers.size(); i++) {
 				int[] xy = centers.get(i);
-				Point p = new Point(xy[0], xy[1]);
+				Point p = new Point(xy[0], xy[1]);	
 				Scalar s = new Scalar(0, 255, 0, 1);
-				
 				Imgproc.drawMarker(img, p, s);
 			}
+			Point trueCenter = new Point(321, 241);
+			Scalar c = new Scalar(0, 0, 255, 1);
+			Imgproc.drawMarker(img, trueCenter, c);
+			
+			Imgproc.drawMarker(img, center, c);
 		}
 		
 		public ArrayList<MatOfPoint> approxContours(ArrayList<MatOfPoint> contours) {
@@ -457,22 +466,66 @@ public class GripPipeline {
 			return mats2f;
 		}
 		
+//		public static MatOfPoint findGoal(ArrayList<MatOfPoint> contours) {
+//			ArrayList<Double> areas = new ArrayList<Double>();
+//			MatOfPoint goal = new MatOfPoint();
+//			
+//			for(int i = 0; i < contours.size(); i++) {
+//				double temp = Imgproc.contourArea(contours.get(i));
+//				areas.add(i, temp);
+//			}
+//			
+//			if(contours.size() == 0) {
+//				goal = null;
+//			} else {
+//				int indexMinArea = areas.indexOf(Collections.min(areas));
+//				goal = contours.get(indexMinArea);
+//			}
+//			return goal;
+//		}
+		
 		public static MatOfPoint findGoal(ArrayList<MatOfPoint> contours) {
-			ArrayList<Double> areas = new ArrayList<Double>();
-			MatOfPoint goal = new MatOfPoint();
 			
-			for(int i = 0; i < contours.size(); i++) {
-				double temp = Imgproc.contourArea(contours.get(i));
-				areas.add(i, temp);
-			}
+			ArrayList<Integer[]> errorPairs = new ArrayList<Integer[]>();
+			ArrayList<Double> errors = new ArrayList<Double>();
 			
 			if(contours.size() == 0) {
-				goal = null;
-			} else {
-				int indexMinArea = areas.indexOf(Collections.min(areas));
-				goal = contours.get(indexMinArea);
+				return null;
 			}
-			return goal;
+			
+			for(int i = 0; i < contours.size(); i++) {
+				for(int j = i + 1; j < contours.size(); j++) {
+					Point temp = findGoalCenter(contours.get(i));
+					Point otherTemp = findGoalCenter(contours.get(j));
+					
+					double xError = temp.x - otherTemp.x;
+					double yError = temp.y - otherTemp.y;
+					
+					double totalError = Math.sqrt(Math.pow(xError, 2) + Math.pow(yError, 2));
+					
+					if(totalError < 10) {					
+						Integer[] temps = {i, j};
+						errorPairs.add(temps);
+						errors.add(totalError);
+					}
+				}			
+			}	
+			
+			if(errors.size() <= 0) {
+				return null;
+			} else {
+				int lowestErrorLoc = errors.indexOf(Collections.min(errors));
+				
+				Integer[] temp = errorPairs.get(lowestErrorLoc);
+				MatOfPoint cont1 = contours.get(temp[0]);
+				MatOfPoint cont2 = contours.get(temp[1]);
+				
+				if(Imgproc.contourArea(cont1) < Imgproc.contourArea(cont2)) {
+					return cont1;
+				} else {
+					return cont2;
+				}
+			}
 		}
 		
 //		public static RotatedRect findGoalRect(MatOfPoint goal) {
@@ -499,16 +552,16 @@ public class GripPipeline {
 //			return goalRect.size.width;
 //		}
 		
-		public static Rect findGoalRect(MatOfPoint goal) {
-			Rect goalRect = new Rect();
-			
-			if(goal == null) {
-				goalRect = null;
-			} else {
-				goalRect = Imgproc.boundingRect(goal);
-			}
-			return goalRect;
-		}
+//		public static Rect findGoalRect(MatOfPoint goal) {
+//			Rect goalRect = new Rect();
+//			
+//			if(goal == null) {
+//				goalRect = null;
+//			} else {
+//				goalRect = Imgproc.boundingRect(goal);
+//			}
+//			return goalRect;
+//		}
 		
 		public static double findGoalWidth(MatOfPoint goal) {
 //			Rect goalRect = new Rect();
@@ -538,28 +591,28 @@ public class GripPipeline {
 			}			
 		}
 		
-		public static double findGoalArea(ArrayList<MatOfPoint> contours) {
-			ArrayList<Double> areas = new ArrayList<Double>();
-			double area;
-			
-			for(int i = 0; i < contours.size(); i++) {
-				double temp = Imgproc.contourArea(contours.get(i));
-				areas.add(i, temp);
-			}
-			
-			if(contours.size() == 0) {
-				area = 0;
-			} else {
-				area = Collections.min(areas);
-			}
-			return area;
+//		public static double findGoalArea(ArrayList<MatOfPoint> contours) {
+//			ArrayList<Double> areas = new ArrayList<Double>();
+//			double area;
+//			
+//			for(int i = 0; i < contours.size(); i++) {
+//				double temp = Imgproc.contourArea(contours.get(i));
+//				areas.add(i, temp);
+//			}
+//			
+//			if(contours.size() == 0) {
+//				area = 0;
+//			} else {
+//				area = Collections.min(areas);
+//			}
+//			return area;
+//		}
+		
+		public static double distanceToCamera(double knownWidth, double focalLength, double pixWidth) {			
+			return (knownWidth * focalLength) / pixWidth;
 		}
 		
-		public static double distanceToCamera(double knownWidth, double focalLength, double perWidth) {			
-			return (knownWidth * focalLength) / perWidth;
-		}
-		
-		public static double focalLength(MatOfPoint goal) {
+		public static double focalLength() {
 //			double knownDistance = 80;
 //			double knownWidth = 34.5;
 //			double pixWidth = findGoalWidth(goal);
@@ -570,7 +623,7 @@ public class GripPipeline {
 			return 796.507393917613;
 		}
 		
-		public double goalDistance(MatOfPoint goal) {
+		public static double goalDistance(MatOfPoint goal) {
 			double distance;
 			
 			if(goal == null) {
@@ -578,11 +631,41 @@ public class GripPipeline {
 			} else {
 				double knownWidth = 34.5;
 				double width = findGoalWidth(goal);
-				double focalLength = focalLength(goal);
+				double focalLength = focalLength();
 				distance = distanceToCamera(knownWidth, focalLength, width);
 			}
 					
 			return distance;
+		}
+		
+		public static double pixToInch(double pixWidth, double distance) {	
+			double focalLength = focalLength();
+			return (pixWidth * distance) / focalLength;		
+		}
+		
+		public static Point findGoalCenter(MatOfPoint goal) {
+			
+			if(goal != null) {
+				Moments moments = Imgproc.moments(goal);
+				int xCenter = (int) (moments.get_m10() / moments.get_m00());
+				int yCenter = (int) (moments.get_m01() / moments.get_m00());
+				Point center = new Point(xCenter, yCenter);
+					
+				return center;
+			}
+			
+			return new Point(321, 241);
+		}
+		
+		public static double findXAngle(MatOfPoint goal) {
+			//sin(z) = pixToInch(target from center) / distance in inches
+						
+			Point centerPoint = findGoalCenter(goal);
+			Point trueCenter = new Point(321, 241);
+			
+			double pixDistFromCenter = centerPoint.x - trueCenter.x;
+			
+			return Math.toDegrees(Math.asin((pixToInch(pixDistFromCenter, goalDistance(goal))/ goalDistance(goal))));
 		}
 		
 }

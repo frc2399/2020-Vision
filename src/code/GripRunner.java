@@ -103,7 +103,7 @@ public class GripRunner<P extends GripPipeline> {
 	public void runOnce() {
 		m_cvSink.read(m_image);
 		m_pipeline.process(m_image);
-		m_pipeline.drawCenters(m_pipeline.findContourCenters(m_pipeline.findContoursOutput()), m_image);
+		m_pipeline.drawCenters(m_pipeline.findContourCenters(m_pipeline.filterContoursOutput()), m_pipeline.findGoalCenter(m_pipeline.findGoal(m_pipeline.filterContoursOutput())), m_image);
 		//m_pipeline.drawMyContours(m_pipeline.approxContours(m_pipeline.findContoursOutput()), m_image);
 		m_pipeline.drawMyContours(m_pipeline.approxContours(m_pipeline.filterContoursOutput()), m_pipeline.findGoal(m_pipeline.filterContoursOutput()), m_image);
 		
