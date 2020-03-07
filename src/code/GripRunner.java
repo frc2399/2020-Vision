@@ -11,6 +11,10 @@ package code;
 import org.opencv.videoio.VideoCapture;
 import org.opencv.videoio.Videoio;
 
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,6 +36,8 @@ import org.opencv.imgproc.Moments;
 public class GripRunner<P extends GripPipeline> {
 
 	static {
+//		System.out.println(System.getProperty("java.library.path"));
+//		System.out.println("");
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 	}
 	
@@ -45,6 +51,10 @@ public class GripRunner<P extends GripPipeline> {
 	private final Listener<? super P> m_listener;
 	private int frameCount = 0;
 	private long frameCountTimeout = System.currentTimeMillis() + 1000L * FRAME_COUNT_SPAN;
+	
+	NetworkTableInstance inst = NetworkTableInstance.getDefault();
+    NetworkTable table = inst.getTable("datatable");
+    NetworkTableEntry xEntry = table.getEntry("horizontalAngle");
 
 	/**
 	 * Listener interface for a callback that should run after a pipeline has
@@ -120,8 +130,12 @@ public class GripRunner<P extends GripPipeline> {
 	 * @see VisionThread
 	 */
 	public void runForever() {
+		inst.startClientTeam(2399);  // where TEAM=190, 294, etc, or use inst.startClient("hostname") or similar
+	    inst.startDSClient();  // recommended if running on DS computer; this gets the robot IP from the DS
+	    
 		while (!Thread.currentThread().isInterrupted()) {
 			runOnce();
+			runNetworkTable();
 			if (DEBUG)  {
 				frameCount++;	
 				if (System.currentTimeMillis() > frameCountTimeout)  {
@@ -132,6 +146,12 @@ public class GripRunner<P extends GripPipeline> {
 			}
 		}
 	}
+	
+	public void runNetworkTable() {
+		double xAngle = m_pipeline.getXAngle();
+		xEntry.setDouble(xAngle);
+	}
+	
 
 	/**
 	 * Make a connection to a camera.

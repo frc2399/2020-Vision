@@ -24,7 +24,7 @@ import org.opencv.objdetect.*;
 * @author GRIP
 */
 public class GripPipeline {
-
+	
 	//Outputs
 		private Mat blurOutput = new Mat();
 		private Mat hsvThresholdOutput = new Mat();
@@ -666,6 +666,10 @@ public class GripPipeline {
 			double pixDistFromCenter = centerPoint.x - trueCenter.x;
 			
 			return Math.toDegrees(Math.asin((pixToInch(pixDistFromCenter, goalDistance(goal))/ goalDistance(goal))));
+		}
+		
+		public double getXAngle() {
+			return findXAngle(findGoal(filterContoursOutput()));
 		}
 		
 }

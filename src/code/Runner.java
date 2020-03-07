@@ -14,6 +14,8 @@ import code.GripRunner;
 import code.GripRunner.Listener;
 import code.VideoViewer;
 
+import edu.wpi.first.networktables.NetworkTable;
+
 public class Runner {
 	
 	//320, 240
@@ -24,7 +26,8 @@ public class Runner {
 	final Listener<GripPipeline> listener;
 	final GripRunner<GripPipeline> gripRunner;
 	
-	public Runner() {
+	public Runner() {	
+		
 		this.window = makeWindow("GRIP", IMG_WIDTH, IMG_HEIGHT);
 		this.listener = (this.window!=null) ? (processor -> { window.imshow(processor.sourceOutput());}) : null;
 		//this.listener = (this.window!=null) ? (processor -> { window.imshow(processor.hsvThresholdOutput());}) : null;

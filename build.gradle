@@ -10,8 +10,7 @@ plugins {
     // Apply the java-library plugin to add support for Java Library
     id 'java-library'
     //id 'eclipse'
-    id 'application'
-    
+    id 'application'    
 }
 
 def openCvVersion = '3.1.0'
@@ -30,16 +29,21 @@ dependencies {
     
     // Add ntcore-java
     compile "edu.wpi.first.ntcore:ntcore-java:2020.3.2"
+    //compile "ntcore:ntcore-java:2020.3.2"
 
     // Add wpiutil-java
     compile "edu.wpi.first.wpiutil:wpiutil-java:2020.3.2"
+    //compile "wpiutil:wpiutil-java:2020.3.2"
 
     // Add ntcore-jni for runtime. We are adding all supported platforms
     // so that our application will work on all supported platforms.
-    runtime "edu.wpi.first.ntcore:ntcore-jni:2020.3.2:windowsx86"
+    //runtime "edu.wpi.first.ntcore:ntcore-jni:2020.3.2:windowsx86"
+    
     runtime "edu.wpi.first.ntcore:ntcore-jni:2020.3.2:windowsx86-64"
-    runtime "edu.wpi.first.ntcore:ntcore-jni:2020.3.2:linuxx86-64"
-    runtime "edu.wpi.first.ntcore:ntcore-jni:2020.3.2:osxx86-64"
+    //runtime "ntcorejni:ntcore-jni:2020.3.2:windowsx86-64"
+    
+    //runtime "edu.wpi.first.ntcore:ntcore-jni:2020.3.2:linuxx86-64"
+    //runtime "edu.wpi.first.ntcore:ntcore-jni:2020.3.2:osxx86-64"
 }
 
 // In this section you declare where to find the dependencies of your project
@@ -47,7 +51,7 @@ repositories {
     // Use jcenter for resolving your dependencies.
     // You can declare any Maven/Ivy/file repository here.
     maven { url "https://frcmaven.wpi.edu/artifactory/release/" }
-    //jcenter()
+    jcenter()
     
     flatDir{
       dirs 'C:/Users/rebec/OpenCV/jni'
@@ -56,11 +60,21 @@ repositories {
     flatDir{
       dirs 'C:/Users/rebec/OpenCV/java'
     }
+    
+    //flatDir{
+    //	dirs 'C:/Users/rebec/OneDrive/Documents/FRC Fighting Unicorns/2020/n'
+    //}
 }
 
 tasks.withType(JavaExec) {
-    systemProperty "java.library.path", "C:/Users/rebec/OpenCV/jni"
+    
+    systemProperty "java.library.path", System.getProperty("java.library.path") + ";C:/Users/rebec/OpenCV/jni;C:/Users/rebec/.wpilib/nativecache/windows/x86-64" 
+    //systemProperty "java.library.path", "C:/Users/rebec/OpenCV/jni"
+    //systemProperty "java.library.path", "C:/Users/rebec/.wpilib/nativecache/windows/x86-64"
 }
+
+//compileJava.options.fork = true
+//compileJava.options.forkOptions.executable = "C:/Program Files/Java/jdk-11.0.6"
 
 sourceSets.main.java.srcDirs = ['src']
 mainClassName = 'code.Runner'
