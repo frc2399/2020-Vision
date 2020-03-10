@@ -51,10 +51,6 @@ public class GripRunner<P extends GripPipeline> {
 	private final Listener<? super P> m_listener;
 	private int frameCount = 0;
 	private long frameCountTimeout = System.currentTimeMillis() + 1000L * FRAME_COUNT_SPAN;
-	
-	NetworkTableInstance inst = NetworkTableInstance.getDefault();
-    NetworkTable table = inst.getTable("datatable");
-    NetworkTableEntry xEntry = table.getEntry("horizontalAngle");
 
 	/**
 	 * Listener interface for a callback that should run after a pipeline has
@@ -110,7 +106,7 @@ public class GripRunner<P extends GripPipeline> {
 	 * use {@link #runForever} in its own thread using a {@link VisionThread}.
 	 * </p>
 	 */
-	public void runOnce() {
+	public void runOnce(NetworkTableEntry xAng, NetworkTableEntry dist) {
 		m_cvSink.read(m_image);
 		m_pipeline.process(m_image);
 		m_pipeline.drawCenters(m_pipeline.findContourCenters(m_pipeline.filterContoursOutput()), m_pipeline.findGoalCenter(m_pipeline.findGoal(m_pipeline.filterContoursOutput())), m_image);
@@ -120,6 +116,12 @@ public class GripRunner<P extends GripPipeline> {
 		if (m_listener != null) { 
 			m_listener.copyPipelineOutputs(m_pipeline); 
 		}
+		
+		double xAngle = m_pipeline.getXAngle();
+		double distance = m_pipeline.getDistance();
+		
+		xAng.setDouble(xAngle);
+		dist.setDouble(distance);
 	}
 
 	/**
@@ -129,13 +131,9 @@ public class GripRunner<P extends GripPipeline> {
 	 * 
 	 * @see VisionThread
 	 */
-	public void runForever() {
-		inst.startClientTeam(2399);  // where TEAM=190, 294, etc, or use inst.startClient("hostname") or similar
-	    inst.startDSClient();  // recommended if running on DS computer; this gets the robot IP from the DS
-	    
+	public void runForever(NetworkTableEntry xAng, NetworkTableEntry dist) {
 		while (!Thread.currentThread().isInterrupted()) {
-			runOnce();
-			runNetworkTable();
+			runOnce(xAng, dist);			
 			if (DEBUG)  {
 				frameCount++;	
 				if (System.currentTimeMillis() > frameCountTimeout)  {
@@ -145,11 +143,6 @@ public class GripRunner<P extends GripPipeline> {
 				}
 			}
 		}
-	}
-	
-	public void runNetworkTable() {
-		double xAngle = m_pipeline.getXAngle();
-		xEntry.setDouble(xAngle);
 	}
 	
 

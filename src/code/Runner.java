@@ -15,6 +15,8 @@ import code.GripRunner.Listener;
 import code.VideoViewer;
 
 import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
 
 public class Runner {
 	
@@ -38,8 +40,16 @@ public class Runner {
 	}
 
 	public static void main(String[] args) {
+		NetworkTableInstance inst = NetworkTableInstance.getDefault();
+	    NetworkTable table = inst.getTable("datatable");
+	    NetworkTableEntry xAng = table.getEntry("xAngle");
+	    NetworkTableEntry dist = table.getEntry("distance");
+	    
+	    inst.startClientTeam(2399);  // where TEAM=190, 294, etc, or use inst.startClient("hostname") or similar
+		inst.startDSClient();  // recommended if running on DS computer; this gets the robot IP from the DS
+		
 		Runner app = new Runner();
-		app.gripRunner.runForever();
+		app.gripRunner.runForever(xAng, dist);
 	}
 
 }

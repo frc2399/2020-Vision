@@ -99,9 +99,10 @@ public class GripPipeline {
 
 			//print goal distance from camera
 			
-			System.out.println(findXAngle(findGoal(filterContoursOutput())));
+			//System.out.println("ANGLE: " + findXAngle(findGoal(filterContoursOutput())));
+			//System.out.println("DISTANCE: " + goalDistance(findGoal(filterContoursOutput())));
+			
 			//System.out.println(focalLength(findGoal(filterContoursOutput())));
-			//System.out.println(goalDistance(findGoal(filterContoursOutput())));
 			//System.out.println(pixToInch(findGoalWidth(findGoal(filterContoursOutput())), goalDistance(findGoal(filterContoursOutput()))));
 		
 			
@@ -670,6 +671,10 @@ public class GripPipeline {
 		
 		public double getXAngle() {
 			return findXAngle(findGoal(filterContoursOutput()));
+		}
+		
+		public double getDistance() {
+			return goalDistance(findGoal(filterContoursOutput()));
 		}
 		
 }
