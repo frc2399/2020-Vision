@@ -41,7 +41,7 @@ public class Runner {
 
 	public static void main(String[] args) {
 		NetworkTableInstance inst = NetworkTableInstance.getDefault();
-	    NetworkTable table = inst.getTable("datatable");
+	    NetworkTable table = inst.getTable("database");
 	    NetworkTableEntry xAng = table.getEntry("xAngle");
 	    NetworkTableEntry dist = table.getEntry("distance");
 	    

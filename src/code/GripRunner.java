@@ -15,6 +15,8 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 
+import edu.wpi.first.cameraserver.CameraServer;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -156,18 +158,22 @@ public class GripRunner<P extends GripPipeline> {
 	 * @return
 	 */
 	public static VideoCapture makeCamera(int device, int width, int height, double exposure) {
-		VideoCapture camera = new VideoCapture(1);
-		camera.set(Videoio.CAP_PROP_FRAME_WIDTH, width);
-		camera.set(Videoio.CAP_PROP_FRAME_HEIGHT, height);
-		if (exposure > -1.0) {
-			System.out.println("\t" + exposure);
-			camera.set(Videoio.CAP_PROP_AUTO_EXPOSURE, 0);
-			camera.set(Videoio.CAP_PROP_EXPOSURE, exposure);
-		}
-		if (!camera.isOpened()) {
-			throw new RuntimeException("Camera will not open");
-		}
-		return camera;
+//		VideoCapture camera = new VideoCapture(1);
+//		camera.set(Videoio.CAP_PROP_FRAME_WIDTH, width);
+//		camera.set(Videoio.CAP_PROP_FRAME_HEIGHT, height);
+//		if (exposure > -1.0) {
+//			System.out.println("\t" + exposure);
+//			camera.set(Videoio.CAP_PROP_AUTO_EXPOSURE, 0);
+//			camera.set(Videoio.CAP_PROP_EXPOSURE, exposure);
+//		}
+//		if (!camera.isOpened()) {
+//			throw new RuntimeException("Camera will not open");
+//		}
+		
+		String cam = CameraServer.getInstance().getServer().getName();
+		System.out.println(cam);
+		VideoCapture c = new VideoCapture(cam);
+		return c;
 	}
 	
 	/**

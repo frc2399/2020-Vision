@@ -34,6 +34,12 @@ dependencies {
     // Add wpiutil-java
     compile "edu.wpi.first.wpiutil:wpiutil-java:2020.3.2"
     //compile "wpiutil:wpiutil-java:2020.3.2"
+    
+    // Add cscore
+    compile "edu.wpi.first.cscore:cscore-java:2020.3.2"
+    
+    // Add cameraserver
+    compile "edu.wpi.first.cameraserver:cameraserver-java:2020.3.2"
 
     // Add ntcore-jni for runtime. We are adding all supported platforms
     // so that our application will work on all supported platforms.
@@ -44,6 +50,9 @@ dependencies {
     
     //runtime "edu.wpi.first.ntcore:ntcore-jni:2020.3.2:linuxx86-64"
     //runtime "edu.wpi.first.ntcore:ntcore-jni:2020.3.2:osxx86-64"
+    
+    runtime "edu.wpi.first.cameraserver:cameraserver-java:2020.3.2"
+    runtime "edu.wpi.first.cscore:cscore-java:2020.3.2"
 }
 
 // In this section you declare where to find the dependencies of your project
